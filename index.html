@@ -1,49 +1,147 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ИБпрофен — Медицинская база</title>
+  <title>IBprofen — Medical Database</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      background: #f4faff;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #0077b6;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 4px solid #023e8a;
+    }
+
+    header h1 {
+      margin-bottom: 10px;
+    }
+
+    main {
+      display: flex;
+      justify-content: space-around;
+      padding: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .form-section, .list-section {
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      color: #0077b6;
+    }
+
+    form input, form textarea, form button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    form textarea {
+      resize: vertical;
+      height: 80px;
+    }
+
+    form button {
+      background: #0077b6;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    form button:hover {
+      background: #023e8a;
+    }
+
+    .card {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      margin-bottom: 8px;
+      color: #023e8a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #eaf4fc;
+      margin-top: 30px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Добро пожаловать в ИБпрофен</h1>
-  <form id="addMedicine">
-    <input type="text" name="name" placeholder="Название лекарства" required>
-    <input type="text" name="use" placeholder="Назначение" required>
-    <button type="submit">Добавить</button>
-  </form>
+  <header>
+    <h1>IBprofen</h1>
+    <p>Independent Medical Information System</p>
+  </header>
 
-  <h2>Список лекарств:</h2>
-  <ul id="medList"></ul>
+  <main>
+    <section class="form-section">
+      <h2>Add Patient History</h2>
+      <form id="addPatient">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="number" name="age" placeholder="Age" required>
+        <textarea name="history" placeholder="Disease history..." required></textarea>
+        <button type="submit">Save</button>
+      </form>
+    </section>
+
+    <section class="list-section">
+      <h2>Patients Database</h2>
+      <div id="patients"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 IBprofen. All rights reserved.</p>
+  </footer>
 
   <script>
-    async function loadMeds() {
-      let res = await fetch("/medicines");
-      let data = await res.json();
-      let list = document.getElementById("medList");
-      list.innerHTML = "";
-      data.forEach(m => {
-        let li = document.createElement("li");
-        li.textContent = m.name + " — " + m.use;
-        list.appendChild(li);
+    // В демо данные сохраняются в браузере (LocalStorage)
+    let patients = JSON.parse(localStorage.getItem("patients") || "[]");
+
+    function renderPatients() {
+      let container = document.getElementById("patients");
+      container.innerHTML = "";
+      patients.forEach(p => {
+        let card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${p.name}, ${p.age}</h3>
+          <p><strong>History:</strong> ${p.history}</p>
+        `;
+        container.appendChild(card);
       });
     }
 
-    document.getElementById("addMedicine").addEventListener("submit", async e => {
-      e.preventDefault();
-      let form = new FormData(e.target);
-      await fetch("/medicines", {
-        method: "POST",
-        body: JSON.stringify({
-          name: form.get("name"),
-          use: form.get("use")
-        }),
-        headers: {"Content-Type": "application/json"}
-      });
-      e.target.reset();
-      loadMeds();
-    });
-
-    loadMeds();
-  </script>
-</body>
-</html>
+    document.getElementById("addPatient").addEventListener("submit", e => {
